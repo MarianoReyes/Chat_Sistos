@@ -35,8 +35,8 @@ void create_user(int sockfd)
     // Creamos el mensaje de opción de usuario
     user_option.op = 1;
     user_option.createuser = &createuser;
-    int user_option_size = chat_sist_o_s__user_option__get_packed_size(&user_option);
-    chat_sist_o_s__user_option__pack(&user_option, buffer);
+    int user_option_size = chat_sist_os__user_option__get_packed_size(&user_option);
+    chat_sist_os__user_option__pack(&user_option, buffer);
 
     // Enviamos el mensaje al servidor
     bytes_sent = send(sockfd, buffer, user_option_size, 0);
@@ -55,17 +55,17 @@ void create_user(int sockfd)
     }
 
     // Decodificamos la respuesta
-    ChatSistOS__ServerResponse *response = chat_sist_o_s__server_response__unpack(NULL, bytes_received, buffer);
-    if (response == NULL)
+    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
+    if (response_message == NULL)
     {
         perror("Error al decodificar la respuesta del servidor");
         return;
     }
 
     // Imprimimos la respuesta del servidor
-    printf("%s\n", response->response);
+    printf("%s\n", response_message->response_message);
 
-    chat_sist_o_s__server_response__free_unpacked(response, NULL);
+    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void view_users(int sockfd)
@@ -76,8 +76,8 @@ void view_users(int sockfd)
 
     // Creamos el mensaje de opción de usuario
     user_option.op = 2;
-    int user_option_size = chat_sist_o_s__user_option__get_packed_size(&user_option);
-    chat_sist_o_s__user_option__pack(&user_option, buffer);
+    int user_option_size = chat_sist_os__user_option__get_packed_size(&user_option);
+    chat_sist_os__user_option__pack(&user_option, buffer);
 
     // Enviamos el mensaje al servidor
     bytes_sent = send(sockfd, buffer, user_option_size, 0);
@@ -96,17 +96,17 @@ void view_users(int sockfd)
     }
 
     // Decodificamos la respuesta
-    ChatSistOS__ServerResponse *response = chat_sist_o_s__server_response__unpack(NULL, bytes_received, buffer);
-    if (response == NULL)
+    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
+    if (response_message == NULL)
     {
         perror("Error al decodificar la respuesta del servidor");
         return;
     }
 
     // Imprimimos la respuesta del servidor
-    printf("%s\n", response->response);
+    printf("%s\n", response_message->response_message);
 
-    chat_sist_o_s__server_response__free_unpacked(response, NULL);
+    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void change_status(int sockfd)
@@ -123,8 +123,8 @@ void change_status(int sockfd)
     // Creamos el mensaje de opción de usuario
     user_option.op = 3;
     user_option.status = &status;
-    int user_option_size = chat_sist_o_s__user_option__get_packed_size(&user_option);
-    chat_sist_o_s__user_option__pack(&user_option, buffer);
+    int user_option_size = chat_sist_os__user_option__get_packed_size(&user_option);
+    chat_sist_os__user_option__pack(&user_option, buffer);
 
     // Enviamos el mensaje al servidor
     bytes_sent = send(sockfd, buffer, user_option_size, 0);
@@ -143,17 +143,17 @@ void change_status(int sockfd)
     }
 
     // Decodificamos la respuesta
-    ChatSistOS__ServerResponse *response = chat_sist_o_s__server_response__unpack(NULL, bytes_received, buffer);
-    if (response == NULL)
+    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
+    if (response_message == NULL)
     {
         perror("Error al decodificar la respuesta del servidor");
         return;
     }
 
     // Imprimimos la respuesta del servidor
-    printf("%s\n", response->response);
+    printf("%s\n", response_message->response_message);
 
-    chat_sist_o_s__server_response__free_unpacked(response, NULL);
+    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void send_message(int sockfd)
@@ -176,8 +176,8 @@ void send_message(int sockfd)
     // Creamos el mensaje de opción de usuario
     user_option.op = 4;
     user_option.message = &message;
-    int user_option_size = chat_sist_o_s__user_option__get_packed_size(&user_option);
-    chat_sist_o_s__user_option__pack(&user_option, buffer);
+    int user_option_size = chat_sist_os__user_option__get_packed_size(&user_option);
+    chat_sist_os__user_option__pack(&user_option, buffer);
 
     // Enviamos el mensaje al servidor
     bytes_sent = send(sockfd, buffer, user_option_size, 0);
@@ -196,17 +196,17 @@ void send_message(int sockfd)
     }
 
     // Decodificamos la respuesta
-    ChatSistOS__ServerResponse *response = chat_sist_o_s__server_response__unpack(NULL, bytes_received, buffer);
-    if (response == NULL)
+    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
+    if (response_message == NULL)
     {
         perror("Error al decodificar la respuesta del servidor");
         return;
     }
 
     // Imprimimos la respuesta del servidor
-    printf("%s\n", response->response);
+    printf("%s\n", response_message->response_message);
 
-    chat_sist_o_s__server_response__free_unpacked(response, NULL);
+    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 int main(int argc, char const *argv[])
