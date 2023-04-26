@@ -22,8 +22,8 @@ void print_menu()
 
 void create_user(int sockfd)
 {
-    ChatSistOS__CreateUser createuser = CHAT_SIST_O_S__CREATE_USER__INIT;
-    ChatSistOS__UserOption user_option = CHAT_SIST_O_S__USER_OPTION__INIT;
+    ChatSistOS__NewUser createuser = CHAT_SIST_OS__NEW_USER__INIT;
+    ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
     int bytes_sent, bytes_received;
 
@@ -70,7 +70,7 @@ void create_user(int sockfd)
 
 void view_users(int sockfd)
 {
-    ChatSistOS__UserOption user_option = CHAT_SIST_O_S__USER_OPTION__INIT;
+    ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
     int bytes_sent, bytes_received;
 
@@ -111,8 +111,8 @@ void view_users(int sockfd)
 
 void change_status(int sockfd)
 {
-    ChatSistOS__UserStatus status = CHAT_SIST_O_S__USER_STATUS__INIT;
-    ChatSistOS__UserOption user_option = CHAT_SIST_O_S__USER_OPTION__INIT;
+    ChatSistOS__Status status = CHAT_SIST_OS__STATUS__INIT;
+    ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
     int bytes_sent, bytes_received;
     // Leemos el nuevo estado
@@ -158,8 +158,8 @@ void change_status(int sockfd)
 
 void send_message(int sockfd)
 {
-    ChatSistOS__Message message = CHAT_SIST_O_S__MESSAGE__INIT;
-    ChatSistOS__UserOption user_option = CHAT_SIST_O_S__USER_OPTION__INIT;
+    ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
+    ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
     int bytes_sent, bytes_received;
 
@@ -170,8 +170,8 @@ void send_message(int sockfd)
 
     // Leemos el mensaje
     printf("Introduzca el mensaje: ");
-    fgets(message.message, BUFFER_SIZE, stdin);
-    message.message[strlen(message.message) - 1] = '\0';
+    fgets(message.message_content, BUFFER_SIZE, stdin);
+    message.message_content[strlen(message.message_content) - 1] = '\0';
 
     // Creamos el mensaje de opción de usuario
     user_option.op = 4;

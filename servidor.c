@@ -75,9 +75,9 @@ void *client_handler(void *arg)
                 if (strcmp(clients[i].username, destination) == 0)
                 {
                     int dest_fd = clients[i].client_fd;
-                    ChatSistOS__UserOption option = CHAT_SIST_O_S__USER_OPTION__INIT;
+                    ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
                     option.op = 4;
-                    ChatSistOS__Message message = CHAT_SIST_O_S__MESSAGE__INIT;
+                    ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
                     message.message_sender = sender;
                     message.message_destination = destination;
                     message.message_content = content;
@@ -133,7 +133,7 @@ void remove_client(int index)
     client->thread_id = 0;
     num_clients--;
 
-    printf("Usuario desconectado\n")
+    printf("Usuario desconectado\n");
 
         // Si no es el último cliente de la lista, movemos el último cliente a su posición
         if (index < num_clients)
