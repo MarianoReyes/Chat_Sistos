@@ -16,6 +16,7 @@ typedef struct
 {
     int client_fd;
     char username[BUFFER_SIZE];
+    int32_t user_state;
     pthread_t thread_id;
 } client_t;
 
@@ -33,7 +34,7 @@ void *client_handler(void *arg)
     while ((bytes_received = recv(client_fd, buffer, BUFFER_SIZE, 0)) > 0)
     {
         // Procesamos el mensaje
-        ChatSistOS__UserOption *user_option = chat_sist_o_s__user_option__unpack(NULL, bytes_received, buffer);
+        ChatSistOS__UserOption *user_option = chat_sist_os__user_option__unpack(NULL, bytes_received, buffer);
         if (user_option == NULL)
         {
             perror("Error al decodificar el mensaje");
@@ -82,9 +83,9 @@ void *client_handler(void *arg)
                     message.message_destination = destination;
                     message.message_content = content;
                     option.message = &message;
-                    size_t size = chat_sist_o_s__user_option__get_packed_size(&option);
+                    size_t size = chat_sist_os__user_option__get_packed_size(&option);
                     uint8_t *buffer = malloc(size);
-                    chat_sist_o_s__user_option__pack(&option, buffer);
+                    chat_sist_os__user_option__pack(&option, buffer);
                     send(dest_fd, buffer, size, 0);
                     free(buffer);
                     break;
@@ -97,7 +98,7 @@ void *client_handler(void *arg)
             break;
         }
 
-        chat_sist_o_s__user_option__free_unpacked(user_option, NULL);
+        chat_sist_os__user_option__free_unpacked(user_option, NULL);
     }
 
     // El cliente se desconectó
