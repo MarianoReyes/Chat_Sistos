@@ -8,7 +8,9 @@
 #include "chat-2.pb-c.h"
 
 #define BUFFER_SIZE 1024
-#define PORT 8080
+#define PORT 8082
+
+int sockfd = 0;
 
 void print_menu()
 {
@@ -20,39 +22,48 @@ void print_menu()
     printf("5. Salir\n");
 }
 
-void create_user(int sockfd)
+void create_user()
 {
     ChatSistOS__NewUser createuser = CHAT_SIST_OS__NEW_USER__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
     int bytes_sent, bytes_received;
 
-    // Leemos el nombre de usuario
+    // Leemos el nombre de usuario FUNCIONAL LISTO
     printf("Introduzca un nombre de usuario: ");
-    fgets(createuser.username, BUFFER_SIZE, stdin);
-    createuser.username[strlen(createuser.username) - 1] = '\0';
+    char username[BUFFER_SIZE];
+    fgets(username, BUFFER_SIZE, stdin);
+    username[strlen(username) - 1] = '\0';
+    createuser.username = username;
 
     // Creamos el mensaje de opción de usuario
     user_option.op = 1;
     user_option.createuser = &createuser;
-    int user_option_size = chat_sist_os__user_option__get_packed_size(&user_option);
-    chat_sist_os__user_option__pack(&user_option, buffer);
+    
+    // Serializamos el mensaje de opción de usuario
+    size_t option_size = chat_sist_os__user_option__get_packed_size(&user_option);
+    uint8_t option_buffer[option_size];
+    chat_sist_os__user_option__pack(&user_option, option_buffer);
 
-    // Enviamos el mensaje al servidor
-    bytes_sent = send(sockfd, buffer, user_option_size, 0);
+    // Enviamos el mensaje de opción de usuario al servidor
+    bytes_sent = write(sockfd, option_buffer, option_size);
     if (bytes_sent < 0)
     {
         perror("Error al enviar el mensaje al servidor");
         return;
     }
 
+    printf("\nllegamos hasta aca3");
+
     // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+    bytes_received = read(sockfd, buffer, BUFFER_SIZE);
     if (bytes_received < 0)
     {
         perror("Error al recibir la respuesta del servidor");
         return;
     }
+
+    printf("\nllegamos hasta aca4");
 
     // Decodificamos la respuesta
     ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
@@ -62,13 +73,15 @@ void create_user(int sockfd)
         return;
     }
 
+    printf("\nllegamos hasta aca");
+
     // Imprimimos la respuesta del servidor
     printf("%s\n", response_message->response_message);
 
     chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
-void view_users(int sockfd)
+void view_users()
 {
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
@@ -109,7 +122,7 @@ void view_users(int sockfd)
     chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
-void change_status(int sockfd)
+void change_status()
 {
     ChatSistOS__Status status = CHAT_SIST_OS__STATUS__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
@@ -156,7 +169,7 @@ void change_status(int sockfd)
     chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
-void send_message(int sockfd)
+void send_message()
 {
     ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
@@ -211,7 +224,6 @@ void send_message(int sockfd)
 
 int main(int argc, char const *argv[])
 {
-    int sockfd;
     struct sockaddr_in serv_addr;
     // Creamos el socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -220,6 +232,7 @@ int main(int argc, char const *argv[])
         perror("Error al crear el socket");
         return 1;
     }
+    printf("\nSocket numero: %d",sockfd);
 
     // Configuramos la dirección del servidor
     serv_addr.sin_family = AF_INET;
@@ -237,11 +250,11 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    // Imprimimos el menú
-    print_menu();
-
     while (1)
     {
+        // Imprimimos el menú
+        print_menu();
+
         int option;
         printf("\nOpción seleccionada: ");
         scanf("%d", &option);
@@ -250,16 +263,16 @@ int main(int argc, char const *argv[])
         switch (option)
         {
         case 1:
-            create_user(sockfd);
+            create_user();
             break;
         case 2:
-            view_users(sockfd);
+            view_users();
             break;
         case 3:
-            change_status(sockfd);
+            change_status();
             break;
         case 4:
-            send_message(sockfd);
+            send_message();
             break;
         case 5:
             printf("Saliendo...\n");
