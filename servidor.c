@@ -10,13 +10,13 @@
 
 #define MAX_CLIENTS 10
 #define BUFFER_SIZE 1024
-#define PORT 8080
+#define PORT 8082
 
 typedef struct
 {
     int client_fd;
     char username[BUFFER_SIZE];
-    int32_t user_state;
+    int user_state;
     pthread_t thread_id;
 } client_t;
 
@@ -27,8 +27,10 @@ void *client_handler(void *arg)
 {
     client_t *client = (client_t *)arg;
     char buffer[BUFFER_SIZE];
-    int bytes_received;
+    int bytes_received, bytes_sent;
     int client_fd = client->client_fd;
+
+    ChatSistOS__Answer answer = CHAT_SIST_OS__ANSWER__INIT;
 
     // Recibimos mensajes del cliente
     while ((bytes_received = recv(client_fd, buffer, BUFFER_SIZE, 0)) > 0)
@@ -47,6 +49,20 @@ void *client_handler(void *arg)
         case 1:
             // Crear nuevo usuario
             strcpy(client->username, user_option->createuser->username);
+
+            // Creamos el mensaje de opción de usuario
+            answer.response_message = "Usuario creado con exito.";
+            int answer_size = chat_sist_os__answer__get_packed_size(&answer);
+            chat_sist_os__answer__pack(&answer, buffer);
+
+            // Enviamos el mensaje al cliente
+            bytes_sent = send(client_fd, buffer, answer_size, 0);
+            if (bytes_sent < 0)
+            {
+                perror("Error al enviar el mensaje al servidor");
+                return;
+            }
+
             printf("Nuevo usuario creado: %s\n", client->username);
             break;
         case 2:
@@ -97,7 +113,6 @@ void *client_handler(void *arg)
             printf("Usuario %s envió una opción inválida: %d\n", client->username, user_option->op);
             break;
         }
-
         chat_sist_os__user_option__free_unpacked(user_option, NULL);
     }
 
@@ -136,8 +151,8 @@ void remove_client(int index)
 
     printf("Usuario desconectado\n");
 
-        // Si no es el último cliente de la lista, movemos el último cliente a su posición
-        if (index < num_clients)
+    // Si no es el último cliente de la lista, movemos el último cliente a su posición
+    if (index < num_clients)
     {
         clients[index] = clients[num_clients];
     }

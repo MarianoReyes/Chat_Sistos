@@ -14,7 +14,7 @@ int sockfd = 0;
 
 void print_menu()
 {
-    printf("Seleccione una opción:\n");
+    printf("\nSeleccione una opción:\n");
     printf("1. Crear nuevo usuario\n");
     printf("2. Ver usuarios conectados\n");
     printf("3. Cambiar estado\n");
@@ -46,24 +46,20 @@ void create_user()
     chat_sist_os__user_option__pack(&user_option, option_buffer);
 
     // Enviamos el mensaje de opción de usuario al servidor
-    bytes_sent = write(sockfd, option_buffer, option_size);
+    bytes_sent = send(sockfd, option_buffer, option_size, 0);
     if (bytes_sent < 0)
     {
         perror("Error al enviar el mensaje al servidor");
         return;
     }
 
-    printf("\nllegamos hasta aca3");
-
     // Esperamos la respuesta del servidor
-    bytes_received = read(sockfd, buffer, BUFFER_SIZE);
+    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
     if (bytes_received < 0)
     {
         perror("Error al recibir la respuesta del servidor");
         return;
     }
-
-    printf("\nllegamos hasta aca4");
 
     // Decodificamos la respuesta
     ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
@@ -72,8 +68,6 @@ void create_user()
         perror("Error al decodificar la respuesta del servidor");
         return;
     }
-
-    printf("\nllegamos hasta aca");
 
     // Imprimimos la respuesta del servidor
     printf("%s\n", response_message->response_message);
@@ -232,7 +226,7 @@ int main(int argc, char const *argv[])
         perror("Error al crear el socket");
         return 1;
     }
-    printf("\nSocket numero: %d",sockfd);
+    printf("\nSocket numero: %d\n",sockfd);
 
     // Configuramos la dirección del servidor
     serv_addr.sin_family = AF_INET;
