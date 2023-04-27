@@ -340,7 +340,6 @@ int main(int argc, char const *argv[])
         perror("Error al crear el socket");
         return 1;
     }
-    printf("\nSocket numero: %d\n",sockfd);
 
     // Configuramos la dirección del servidor
     serv_addr.sin_family = AF_INET;
