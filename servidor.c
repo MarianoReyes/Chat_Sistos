@@ -54,6 +54,7 @@ void *client_handler(void *arg)
 
             // Creamos el mensaje de respuesta de usuario
             answer.response_message = "Usuario creado con exito.";
+            answer.op = 1;
             answer_size = chat_sist_os__answer__get_packed_size(&answer);
             chat_sist_os__answer__pack(&answer, buffer);
 
@@ -80,6 +81,7 @@ void *client_handler(void *arg)
 
             // Creamos el mensaje de respuesta de usuario
             answer.response_message = "Lista de usuarios desplegada.";
+            answer.op = 2;
             answer_size = chat_sist_os__answer__get_packed_size(&answer);
             chat_sist_os__answer__pack(&answer, buffer);
 
@@ -117,6 +119,7 @@ void *client_handler(void *arg)
 
                         // Mostramos info del usuario
                         answer.response_message = informacion;
+                        answer.op = 3;
                         answer_size = chat_sist_os__answer__get_packed_size(&answer);
                         chat_sist_os__answer__pack(&answer, buffer);
 
@@ -137,6 +140,7 @@ void *client_handler(void *arg)
 
                 // Creamos el mensaje de respuesta de usuario
                 answer.response_message = "Estado cambiado con exito.";
+                answer.op = 3;
                 answer_size = chat_sist_os__answer__get_packed_size(&answer);
                 chat_sist_os__answer__pack(&answer, buffer);
 
@@ -153,47 +157,45 @@ void *client_handler(void *arg)
             break;
         case 4:
             // Enviar mensaje
-            char *destination = user_option->message->message_destination;
-            char *sender = user_option->message->message_sender;
-            char *content = user_option->message->message_content;
-            int type = user_option->message->message_private;
+            ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
 
-            if (type == 0){
+            if (user_option->message->message_private == 0){
             // broadcast
                 for (int i = 0; i < num_clients; i++)
-                {
-                    if (strcmp(clients[i].username, destination) == 0)
+                {       
+                    message.message_sender = user_option->message->message_sender;
+                    message.message_content = user_option->message->message_content;
+
+                    // Creamos el mensaje de respuesta de usuario
+                    answer.message = &message;
+                    answer.op = 4;
+                    answer_size = chat_sist_os__answer__get_packed_size(&answer);
+                    chat_sist_os__answer__pack(&answer, buffer);
+
+                    // Enviamos el mensaje al cliente
+                    bytes_sent = send(client_fd, buffer, answer_size, 0);
+                    if (bytes_sent < 0)
                     {
-                        int dest_fd = clients[i].client_fd;
-                        ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
-                        option.op = 4;
-                        ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
-                        message.message_sender = sender;
-                        message.message_destination = destination;
-                        message.message_content = content;
-                        option.message = &message;
-                        size_t size = chat_sist_os__user_option__get_packed_size(&option);
-                        uint8_t *buffer = malloc(size);
-                        chat_sist_os__user_option__pack(&option, buffer);
-                        send(dest_fd, buffer, size, 0);
-                        free(buffer);
-                        break;
+                        perror("Error al enviar el mensaje al cliente");
                     }
+
+                    printf("Usuario %s mando el siguiente mensaje como broadcast: %s\n", user_option->message->message_sender, user_option->message->message_content);
+                    break;
                 }
             } 
             else{
             // privado
                 for (int i = 0; i < num_clients; i++)
                 {
-                    if (strcmp(clients[i].username, destination) == 0)
+                    if (strcmp(clients[i].username, user_option->message->message_destination) == 0)
                     {
                         int dest_fd = clients[i].client_fd;
                         ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
                         option.op = 4;
                         ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
-                        message.message_sender = sender;
-                        message.message_destination = destination;
-                        message.message_content = content;
+                        message.message_sender = user_option->message->message_sender;
+                        message.message_destination = user_option->message->message_destination;
+                        message.message_content = user_option->message->message_content;
                         option.message = &message;
                         size_t size = chat_sist_os__user_option__get_packed_size(&option);
                         uint8_t *buffer = malloc(size);

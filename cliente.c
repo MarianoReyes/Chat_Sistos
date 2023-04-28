@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #include "chat-2.pb-c.h"
 
 #define BUFFER_SIZE 1024
@@ -30,7 +31,7 @@ void create_user()
     ChatSistOS__NewUser createuser = CHAT_SIST_OS__NEW_USER__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
-    int bytes_sent, bytes_received;
+    int bytes_sent;
 
     // Leemos el nombre de usuario 
     printf("Introduzca un nombre de usuario: ");
@@ -56,33 +57,13 @@ void create_user()
         return;
     }
 
-    // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
-    {
-        perror("Error al recibir la respuesta del servidor");
-        return;
-    }
-
-    // Decodificamos la respuesta
-    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
-    if (response_message == NULL)
-    {
-        perror("Error al decodificar la respuesta del servidor");
-        return;
-    }
-
-    // Imprimimos la respuesta del servidor
-    printf("\n%s\n", response_message->response_message);
-
-    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void view_users()
 {
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
-    int bytes_sent, bytes_received;
+    int bytes_sent;
 
     // Creamos el mensaje de opción de usuario
     user_option.op = 2;
@@ -97,26 +78,6 @@ void view_users()
         return;
     }
 
-    // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
-    {
-        perror("Error al recibir la respuesta del servidor");
-        return;
-    }
-
-    // Decodificamos la respuesta
-    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
-    if (response_message == NULL)
-    {
-        perror("Error al decodificar la respuesta del servidor");
-        return;
-    }
-
-    // Imprimimos la respuesta del servidor
-    printf("\n%s\n", response_message->response_message);
-
-    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void change_status()
@@ -124,7 +85,7 @@ void change_status()
     ChatSistOS__Status status = CHAT_SIST_OS__STATUS__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
-    int bytes_sent, bytes_received;
+    int bytes_sent;
 
     // Leemos el nuevo estado
     printf("Seleccione un estado (1 = conectado, 2 = ocupado, 3 = desconectado): ");
@@ -145,26 +106,6 @@ void change_status()
         return;
     }
 
-    // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
-    {
-        perror("Error al recibir la respuesta del servidor");
-        return;
-    }
-
-    // Decodificamos la respuesta
-    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
-    if (response_message == NULL)
-    {
-        perror("Error al decodificar la respuesta del servidor");
-        return;
-    }
-
-    // Imprimimos la respuesta del servidor
-    printf("\n%s\n", response_message->response_message);
-
-    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void user_info()
@@ -172,7 +113,7 @@ void user_info()
     ChatSistOS__Status status = CHAT_SIST_OS__STATUS__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
-    int bytes_sent, bytes_received;
+    int bytes_sent;
 
     // Leemos el nombre de usuario 
     printf("Introduzca un nombre de usuario para recibir infomacion: ");
@@ -195,26 +136,6 @@ void user_info()
         return;
     }
 
-    // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
-    {
-        perror("Error al recibir la respuesta del servidor");
-        return;
-    }
-
-    // Decodificamos la respuesta
-    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
-    if (response_message == NULL)
-    {
-        perror("Error al decodificar la respuesta del servidor");
-        return;
-    }
-
-    // Imprimimos la respuesta del servidor
-    printf("\n%s\n", response_message->response_message);
-
-    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void send_message()
@@ -222,7 +143,7 @@ void send_message()
     ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
-    int bytes_sent, bytes_received;
+    int bytes_sent;
 
     // Leemos el destinatario
     printf("Introduzca el nombre del destinatario: ");
@@ -255,26 +176,6 @@ void send_message()
         return;
     }
 
-    // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
-    {
-        perror("Error al recibir la respuesta del servidor");
-        return;
-    }
-
-    // Decodificamos la respuesta
-    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
-    if (response_message == NULL)
-    {
-        perror("Error al decodificar la respuesta del servidor");
-        return;
-    }
-
-    // Imprimimos la respuesta del servidor
-    printf("\n%s\n", response_message->response_message);
-
-    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 void send_broadcast()
@@ -282,7 +183,7 @@ void send_broadcast()
     ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
     ChatSistOS__UserOption user_option = CHAT_SIST_OS__USER_OPTION__INIT;
     char buffer[BUFFER_SIZE];
-    int bytes_sent, bytes_received;
+    int bytes_sent;
 
     // Leemos el mensaje
     printf("Introduzca el mensaje: ");
@@ -307,27 +208,41 @@ void send_broadcast()
         perror("Error al enviar el mensaje al servidor");
         return;
     }
+}
 
-    // Esperamos la respuesta del servidor
-    bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
+void* receive_messages(void* arg)
+{
+    // Thread que se ejecuta en segundo plano para recibir todas las respuestass
+    char buffer[BUFFER_SIZE];
+    int bytes_received;
+
+    while (true)
     {
-        perror("Error al recibir la respuesta del servidor");
-        return;
+        // Esperamos la respuesta del servidor
+        bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+        if (bytes_received < 0)
+        {
+            perror("Error al recibir la respuesta del servidor");
+            return NULL;
+        }
+
+        // Decodificamos la respuesta
+        ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
+        if (response_message == NULL)
+        {
+            perror("Error al decodificar la respuesta del servidor");
+        }
+
+        // Imprimimos el mensaje recibido
+        if ((response_message->op == 1 || response_message->op == 2 || response_message->op == 3)) {
+            printf("\n%s\n", response_message->response_message);
+        }
+        else if((response_message->op)==4){ // AREGLAR ESTO
+            printf("\nNuevo mensaje de %s: %s\n", response_message->message->message_sender, response_message->message->message_sender);
+        }
+
+        chat_sist_os__answer__free_unpacked(response_message, NULL);
     }
-
-    // Decodificamos la respuesta
-    ChatSistOS__Answer *response_message = chat_sist_os__answer__unpack(NULL, bytes_received, buffer);
-    if (response_message == NULL)
-    {
-        perror("Error al decodificar la respuesta del servidor");
-        return;
-    }
-
-    // Imprimimos la respuesta del servidor
-    printf("\n%s\n", response_message->response_message);
-
-    chat_sist_os__answer__free_unpacked(response_message, NULL);
 }
 
 int main(int argc, char const *argv[])
@@ -357,8 +272,20 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
+    // Creamos el hilo para recibir mensajes del servidor
+    pthread_t receive_thread;
+    if (pthread_create(&receive_thread, NULL, receive_messages, NULL) < 0)
+    {
+        perror("Error al crear el hilo para recibir mensajes del servidor");
+        return 1;
+    }
+
+    // Hacemos el detach del hilo
+    pthread_detach(receive_thread);
+
     while (1)
     {
+        usleep(500000);
         // Imprimimos el menú
         print_menu();
 
