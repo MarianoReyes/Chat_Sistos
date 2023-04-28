@@ -165,20 +165,26 @@ void *client_handler(void *arg)
                 for (int i = 0; i < num_clients; i++)
                 {       
                     if (strcmp(user_option->message->message_sender, clients[i].username) != 0){
-                        int dest_fd = clients[i].client_fd;
-                        ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
-                        option.op = 4;
-                        ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
-                        message.message_sender = user_option->message->message_sender;
-                        message.message_content = user_option->message->message_content;
-                        option.message = &message;
-                        size_t size = chat_sist_os__user_option__get_packed_size(&option);
-                        uint8_t *buffer = malloc(size);
-                        chat_sist_os__user_option__pack(&option, buffer);
-                        send(dest_fd, buffer, size, 0);
-                        free(buffer);
-                        printf("Usuario %s mando el siguiente mensaje como broadcast: %s\n", user_option->message->message_sender, user_option->message->message_content);
-                        break;
+                        if( clients[i].user_state == 1)
+                        {
+                            int dest_fd = clients[i].client_fd;
+                            ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
+                            option.op = 4;
+                            ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
+                            message.message_sender = user_option->message->message_sender;
+                            message.message_content = user_option->message->message_content;
+                            option.message = &message;
+                            size_t size = chat_sist_os__user_option__get_packed_size(&option);
+                            uint8_t *buffer = malloc(size);
+                            chat_sist_os__user_option__pack(&option, buffer);
+                            send(dest_fd, buffer, size, 0);
+                            free(buffer);
+                            printf("Usuario %s mando el siguiente mensaje como broadcast: %s\n", user_option->message->message_sender, user_option->message->message_content);
+                            break;
+                        }
+                        else{
+                            printf("Mensaje no enviado a %s por estar ocupado/desconectado\n",clients[i].username);
+                        }
                     }
                 }
             } 
@@ -188,21 +194,27 @@ void *client_handler(void *arg)
                 {
                     if (strcmp(clients[i].username, user_option->message->message_destination) == 0)
                     {
-                        int dest_fd = clients[i].client_fd;
-                        ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
-                        option.op = 4;
-                        ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
-                        message.message_sender = user_option->message->message_sender;
-                        message.message_destination = user_option->message->message_destination;
-                        message.message_content = user_option->message->message_content;
-                        option.message = &message;
-                        size_t size = chat_sist_os__user_option__get_packed_size(&option);
-                        uint8_t *buffer = malloc(size);
-                        chat_sist_os__user_option__pack(&option, buffer);
-                        send(dest_fd, buffer, size, 0);
-                        free(buffer);
-                        printf("Usuario %s mando el siguiente mensaje privado a %s: %s\n", user_option->message->message_sender, user_option->message->message_destination, user_option->message->message_content);
-                        break;
+                        if( clients[i].user_state == 1)
+                        {
+                            int dest_fd = clients[i].client_fd;
+                            ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
+                            option.op = 4;
+                            ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
+                            message.message_sender = user_option->message->message_sender;
+                            message.message_destination = user_option->message->message_destination;
+                            message.message_content = user_option->message->message_content;
+                            option.message = &message;
+                            size_t size = chat_sist_os__user_option__get_packed_size(&option);
+                            uint8_t *buffer = malloc(size);
+                            chat_sist_os__user_option__pack(&option, buffer);
+                            send(dest_fd, buffer, size, 0);
+                            free(buffer);
+                            printf("Usuario %s mando el siguiente mensaje privado a %s: %s\n", user_option->message->message_sender, user_option->message->message_destination, user_option->message->message_content);
+                            break;
+                        }
+                        else{
+                            printf("Mensaje no enviado a %s por estar ocupado/desconectado\n",clients[i].username);
+                        }
                     }
                 }
             }
