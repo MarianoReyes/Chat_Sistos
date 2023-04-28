@@ -11,7 +11,7 @@
 
 #define MAX_CLIENTS 10
 #define BUFFER_SIZE 1024
-#define PORT 8082
+#define PORT 8080
 
 typedef struct
 {
@@ -51,6 +51,7 @@ void *client_handler(void *arg)
         case 1:
             // Crear nuevo usuario
             strcpy(client->username, user_option->createuser->username);
+            client->user_state = 1;
 
             // Creamos el mensaje de respuesta de usuario
             answer.response_message = "Usuario creado con exito.";
@@ -163,24 +164,22 @@ void *client_handler(void *arg)
             // broadcast
                 for (int i = 0; i < num_clients; i++)
                 {       
-                    message.message_sender = user_option->message->message_sender;
-                    message.message_content = user_option->message->message_content;
-
-                    // Creamos el mensaje de respuesta de usuario
-                    answer.message = &message;
-                    answer.op = 4;
-                    answer_size = chat_sist_os__answer__get_packed_size(&answer);
-                    chat_sist_os__answer__pack(&answer, buffer);
-
-                    // Enviamos el mensaje al cliente
-                    bytes_sent = send(client_fd, buffer, answer_size, 0);
-                    if (bytes_sent < 0)
-                    {
-                        perror("Error al enviar el mensaje al cliente");
+                    if (strcmp(user_option->message->message_sender, clients[i].username) != 0){
+                        int dest_fd = clients[i].client_fd;
+                        ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
+                        option.op = 4;
+                        ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
+                        message.message_sender = user_option->message->message_sender;
+                        message.message_content = user_option->message->message_content;
+                        option.message = &message;
+                        size_t size = chat_sist_os__user_option__get_packed_size(&option);
+                        uint8_t *buffer = malloc(size);
+                        chat_sist_os__user_option__pack(&option, buffer);
+                        send(dest_fd, buffer, size, 0);
+                        free(buffer);
+                        printf("Usuario %s mando el siguiente mensaje como broadcast: %s\n", user_option->message->message_sender, user_option->message->message_content);
+                        break;
                     }
-
-                    printf("Usuario %s mando el siguiente mensaje como broadcast: %s\n", user_option->message->message_sender, user_option->message->message_content);
-                    break;
                 }
             } 
             else{
@@ -202,27 +201,16 @@ void *client_handler(void *arg)
                         chat_sist_os__user_option__pack(&option, buffer);
                         send(dest_fd, buffer, size, 0);
                         free(buffer);
+                        printf("Usuario %s mando el siguiente mensaje privado a %s: %s\n", user_option->message->message_sender, user_option->message->message_destination, user_option->message->message_content);
                         break;
                     }
                 }
             }
-
-            // Creamos el mensaje de respuesta de usuario
-            answer.response_message = "Mensaje enviado con exito.";
-            answer_size = chat_sist_os__answer__get_packed_size(&answer);
-            chat_sist_os__answer__pack(&answer, buffer);
-
-            // Enviamos el mensaje al cliente
-            bytes_sent = send(client_fd, buffer, answer_size, 0);
-            if (bytes_sent < 0)
-            {
-                perror("Error al enviar el mensaje al cliente");
-            }
-            printf("Usuario %s mando un mensaje\n", client->username);
-            break;
         default:
             // Opción inválida
-            printf("Usuario %s envió una opción inválida: %d\n", client->username, user_option->op);
+            if ((user_option->op) != 4){
+                printf("Usuario %s trato la opción incorrecta: %d\n", client->username, user_option->op);
+            }
             break;
         }
         chat_sist_os__user_option__free_unpacked(user_option, NULL);

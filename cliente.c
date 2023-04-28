@@ -10,9 +10,10 @@
 #include "chat-2.pb-c.h"
 
 #define BUFFER_SIZE 1024
-#define PORT 8082
+#define PORT 8080
 
 int sockfd = 0;
+char user_name[50];
 
 void print_menu()
 {
@@ -39,6 +40,7 @@ void create_user()
     fgets(username, BUFFER_SIZE, stdin);
     username[strlen(username) - 1] = '\0';
     createuser.username = username;
+    strcpy(user_name, username);
 
     // Creamos el mensaje de opción de usuario
     user_option.op = 1;
@@ -152,12 +154,13 @@ void send_message()
     message_dest[strlen(message_dest) - 1] = '\0';
     message.message_destination = message_dest;
 
-    // Leemos el mensaje
+    // Leemos el mensaje y quien lo envia
     printf("Introduzca el mensaje: ");
     char message_cont[BUFFER_SIZE];
     fgets(message_cont, BUFFER_SIZE, stdin);
     message_cont[strlen(message_cont) - 1] = '\0';
     message.message_content = message_cont;
+    message.message_sender = user_name;
 
     // Seteamos visibilidad de mensaje
     message.message_private = 1;
@@ -185,16 +188,17 @@ void send_broadcast()
     char buffer[BUFFER_SIZE];
     int bytes_sent;
 
-    // Leemos el mensaje
+    // Leemos el mensaje y quien lo envia
     printf("Introduzca el mensaje: ");
     char message_cont[BUFFER_SIZE];
     fgets(message_cont, BUFFER_SIZE, stdin);
     message_cont[strlen(message_cont) - 1] = '\0';
     message.message_content = message_cont;
+    message.message_sender = user_name;
 
     // Seteamos visibilidad de mensaje
     message.message_private = 0;
-
+    
     // Creamos el mensaje de opción de usuario
     user_option.op = 4;
     user_option.message = &message;
@@ -208,6 +212,7 @@ void send_broadcast()
         perror("Error al enviar el mensaje al servidor");
         return;
     }
+    printf("Mensaje broadcast enviado al resto de usuarios\n");
 }
 
 void* receive_messages(void* arg)
@@ -238,7 +243,11 @@ void* receive_messages(void* arg)
             printf("\n%s\n", response_message->response_message);
         }
         else if((response_message->op)==4){ // AREGLAR ESTO
-            printf("\nNuevo mensaje de %s: %s\n", response_message->message->message_sender, response_message->message->message_sender);
+            char sender[50];
+            char content[50];
+            strcpy(sender, response_message->message->message_sender);
+            strcpy(content, response_message->message->message_content);
+            printf("\nNuevo mensaje de %s: %s\n", sender, content);
         }
 
         chat_sist_os__answer__free_unpacked(response_message, NULL);
