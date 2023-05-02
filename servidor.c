@@ -90,7 +90,6 @@ void *client_handler(void *arg)
             // Creamos el mensaje de respuesta de usuario
             answer.response_message = lista_users;
             answer.op = 2;
-            answer.users_online = &users_online;
             answer_size = chat_sist_os__answer__get_packed_size(&answer);
             chat_sist_os__answer__pack(&answer, buffer);
 
