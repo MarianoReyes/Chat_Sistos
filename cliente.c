@@ -256,6 +256,11 @@ void* receive_messages(void* arg)
 
 int main(int argc, char const *argv[])
 {
+
+    // Obtenemos la dirección IP y el puerto de los argumentos
+    const char* ip = argv[1];
+    int port = atoi(argv[2]);
+
     struct sockaddr_in serv_addr;
     // Creamos el socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -267,8 +272,8 @@ int main(int argc, char const *argv[])
 
     // Configuramos la dirección del servidor
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)
+    serv_addr.sin_port = htons(port);
+    if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0)
     {
         perror("Error al asignar la dirección del servidor");
         return 1;

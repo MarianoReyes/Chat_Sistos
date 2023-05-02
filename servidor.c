@@ -74,7 +74,7 @@ void *client_handler(void *arg)
             printf("Lista de usuarios conectados:\n");
             for (int i = 0; i < num_clients; i++)
             {
-                if (clients[i].thread_id != 0)
+                if (clients[i].thread_id != 0 && clients[i].user_state == 1)
                 {
                     printf("- %s\n", clients[i].username);
                 }
@@ -83,6 +83,7 @@ void *client_handler(void *arg)
             // Creamos el mensaje de respuesta de usuario
             answer.response_message = "Lista de usuarios desplegada.";
             answer.op = 2;
+            answer.users_online = &users_online;
             answer_size = chat_sist_os__answer__get_packed_size(&answer);
             chat_sist_os__answer__pack(&answer, buffer);
 
@@ -272,6 +273,10 @@ void remove_client(int index)
 
 int main(int argc, char *argv[])
 {
+
+    // Obtenemos la dirección IP y el puerto de los argumentos
+    int port = atoi(argv[1]);
+
     int server_fd, client_fd;
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
@@ -289,7 +294,7 @@ int main(int argc, char *argv[])
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(port);
 
     // Asociamos el socket con la dirección del servidor
     if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
