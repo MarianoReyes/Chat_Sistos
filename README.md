@@ -1,5 +1,9 @@
 # Chat_Sistos
 
+### Instalar libreria de Protobuf
+
+- sudo apt-get install libprotobuf-c-dev
+
 ### Compilar Servidor y Cliente
 
 - gcc servidor.c chat-2.pb-c.c -o servidor -lprotobuf-c
