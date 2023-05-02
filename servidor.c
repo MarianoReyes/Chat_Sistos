@@ -72,16 +72,23 @@ void *client_handler(void *arg)
             // Ver usuarios conectados
             printf("Usuario %s solicitó lista de usuarios conectados\n", client->username);
             printf("Lista de usuarios conectados:\n");
+
+            char lista_users[250];
+
+            strcpy(lista_users, "Lista de usuarios: ");
+
             for (int i = 0; i < num_clients; i++)
             {
                 if (clients[i].thread_id != 0 && clients[i].user_state == 1)
                 {
                     printf("- %s\n", clients[i].username);
+                    strcat(lista_users, "\n- ");
+                    strcpy(lista_users, clients[i].username);
                 }
             }
 
             // Creamos el mensaje de respuesta de usuario
-            answer.response_message = "Lista de usuarios desplegada.";
+            answer.response_message = lista_users;
             answer.op = 2;
             answer.users_online = &users_online;
             answer_size = chat_sist_os__answer__get_packed_size(&answer);
@@ -96,28 +103,32 @@ void *client_handler(void *arg)
 
             break;
         case 3:
-            if (user_option->status != NULL && strlen(user_option->status->user_name) > 0){
+            if (user_option->status != NULL && strlen(user_option->status->user_name) > 0)
+            {
                 for (int i = 0; i < num_clients; i++)
                 {
                     if (strcmp(clients[i].username, user_option->status->user_name) == 0)
                     {
                         // Mostrar informacion
                         char estado[20] = "";
-                        if ((clients[i].user_state)==1){
+                        if ((clients[i].user_state) == 1)
+                        {
                             strcpy(estado, "conectado");
                         }
-                        else if((clients[i].user_state)==2){
+                        else if ((clients[i].user_state) == 2)
+                        {
                             strcpy(estado, "ocupado");
                         }
-                        else{
+                        else
+                        {
                             strcpy(estado, "desconectado");
                         }
 
                         char informacion[30];
 
-                        strcpy(informacion, clients[i].username); 
-                        strcat(informacion, " esta: "); 
-                        strcat(informacion, estado); 
+                        strcpy(informacion, clients[i].username);
+                        strcat(informacion, " esta: ");
+                        strcat(informacion, estado);
 
                         // Mostramos info del usuario
                         answer.response_message = informacion;
@@ -136,7 +147,8 @@ void *client_handler(void *arg)
                     }
                 }
             }
-            else{
+            else
+            {
                 // Cambiar estado del usuario
                 client->user_state = user_option->status->user_state;
 
@@ -155,18 +167,20 @@ void *client_handler(void *arg)
 
                 printf("Usuario %s cambió su estado a %d\n", client->username, client->user_state);
             }
-                
+
             break;
         case 4:
             // Enviar mensaje
             ChatSistOS__Message message = CHAT_SIST_OS__MESSAGE__INIT;
 
-            if (user_option->message->message_private == 0){
-            // broadcast
+            if (user_option->message->message_private == 0)
+            {
+                // broadcast
                 for (int i = 0; i < num_clients; i++)
-                {       
-                    if (strcmp(user_option->message->message_sender, clients[i].username) != 0){
-                        if( clients[i].user_state == 1)
+                {
+                    if (strcmp(user_option->message->message_sender, clients[i].username) != 0)
+                    {
+                        if (clients[i].user_state == 1)
                         {
                             int dest_fd = clients[i].client_fd;
                             ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
@@ -183,19 +197,21 @@ void *client_handler(void *arg)
                             printf("Usuario %s mando el siguiente mensaje como broadcast: %s\n", user_option->message->message_sender, user_option->message->message_content);
                             break;
                         }
-                        else{
-                            printf("Mensaje no enviado a %s por estar ocupado/desconectado\n",clients[i].username);
+                        else
+                        {
+                            printf("Mensaje no enviado a %s por estar ocupado/desconectado\n", clients[i].username);
                         }
                     }
                 }
-            } 
-            else{
-            // privado
+            }
+            else
+            {
+                // privado
                 for (int i = 0; i < num_clients; i++)
                 {
                     if (strcmp(clients[i].username, user_option->message->message_destination) == 0)
                     {
-                        if( clients[i].user_state == 1)
+                        if (clients[i].user_state == 1)
                         {
                             int dest_fd = clients[i].client_fd;
                             ChatSistOS__UserOption option = CHAT_SIST_OS__USER_OPTION__INIT;
@@ -213,15 +229,17 @@ void *client_handler(void *arg)
                             printf("Usuario %s mando el siguiente mensaje privado a %s: %s\n", user_option->message->message_sender, user_option->message->message_destination, user_option->message->message_content);
                             break;
                         }
-                        else{
-                            printf("Mensaje no enviado a %s por estar ocupado/desconectado\n",clients[i].username);
+                        else
+                        {
+                            printf("Mensaje no enviado a %s por estar ocupado/desconectado\n", clients[i].username);
                         }
                     }
                 }
             }
         default:
             // Opción inválida
-            if ((user_option->op) != 4){
+            if ((user_option->op) != 4)
+            {
                 printf("Usuario %s trato la opción incorrecta: %d\n", client->username, user_option->op);
             }
             break;
