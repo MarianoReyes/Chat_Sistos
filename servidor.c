@@ -83,7 +83,7 @@ void *client_handler(void *arg)
                 {
                     printf("- %s\n", clients[i].username);
                     strcat(lista_users, "\n- ");
-                    strcpy(lista_users, clients[i].username);
+                    strcat(lista_users, clients[i].username);
                 }
             }
 
